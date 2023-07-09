@@ -1,6 +1,7 @@
 
 import React, {useEffect, useState} from 'react';
 import './App.css';
+import axios from "axios";
 import io from 'socket.io-client';
 
 const socket = io.connect("http://localhost:4000");
@@ -31,19 +32,35 @@ function App() {
     }
   }
 
+  const start = async ()=> {
+    await axios.post("http://localhost:5000/message/create", {
+      "from": "client server",
+      "message": "start run"
+    })
+  }
+
   useEffect(()=>{
+
+    start()
+
     socket.on("connect", () => {
       console.log(socket.id);
     });
+   
 
     socket.on("receive_message", (data)=>{
       setMessageList((list) => [...list, data]);
   })
+
+  return()=>{
+    socket.on("disconnect", () => {
+      console.log("Close messages socket");
+    });
+  }
   },[socket]);
 
   return (
     <div className="App">
-     
     <div className='MessageContainer'>
     <h3>Send your message</h3>
     <input type='text' onChange={(event)=> {setUsername(event.target.value)}} placeholder='name....'/>
